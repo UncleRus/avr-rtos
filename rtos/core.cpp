@@ -9,10 +9,10 @@ namespace rtos
 {
 
 
-static task_t *_last = NULL;
-static task_t *_first = NULL;
+static task_t *last = NULL;
+static task_t *first = NULL;
 volatile static bool mutex = false;
-volatile static uint32_t _dropped = 0;
+volatile static uint32_t skipped = 0;
 
 #define acquire_mutex() { while (mutex) {} mutex = true; }
 #define release_mutex() { mutex = false; }
@@ -36,13 +36,13 @@ void start ()
 
 task_t *add (callback_t callback, uint32_t interval, uint8_t max_runs, bool single, bool sleeping)
 {
-	task_t *result = new task_t (callback, interval, max_runs, single, sleeping, _last, NULL);
+	task_t *result = new task_t (callback, interval, max_runs, single, sleeping, last, NULL);
 	if (!result) return NULL;
 
 	acquire_mutex ();
-	if (_last) _last->next = result;
-	if (!_first) _first = result;
-	_last = result;
+	if (last) last->next = result;
+	if (!first) first = result;
+	last = result;
 	release_mutex ();
 
 	return result;
@@ -55,8 +55,8 @@ void remove (task_t *task)
 	acquire_mutex ();
 	if (task->next) task->next->prev = task->prev;
 	if (task->prev) task->prev->next = task->next;
-	if (task == _first) _first = task->next;
-	else if (task == _last) _last = task->prev;
+	if (task == first) first = task->next;
+	else if (task == last) last = task->prev;
 	release_mutex ();
 
 	delete task;
@@ -65,21 +65,21 @@ void remove (task_t *task)
 void tick ()
 {
 	ticks ++;
-	_dropped ++;
+	skipped ++;
 
 	if (mutex) return;
 	mutex = true;
 
-	task_t *task = _first;
+	task_t *task = first;
 	while (task)
 	{
-		task->idle += _dropped;
+		task->idle += skipped;
 		release_mutex ();
 		task->run ();
 		acquire_mutex ();
 		task = task->next;
 	}
-	_dropped = 0;
+	skipped = 0;
 	release_mutex ();
 }
 
