@@ -1,0 +1,41 @@
+#ifndef RTOSP_ATMEGA16_H_
+#define RTOSP_ATMEGA16_H_
+
+#define RTOS_P_MAX_TIMER 2
+
+#if RTOS_CORE_TIMER == RTOS_TIMER0 || RTOS_CORE_TIMER == RTOS_TIMER1
+#	if RTOS_CORE_PRESCALER == RCP_32 || RTOS_CORE_PRESCALER == RCP_128
+#		error Cannot use this prescaler
+#	endif
+#	define RCP_64 	0b011
+#	define RCP_256  0b100
+#	define RCP_1024 0b101
+#endif
+
+#define RTOS_TIMER0_INIT() { \
+	TCCR0 = _BV (WGM01) | (RTOS_CORE_PRESCALER << CS00); \
+	TCNT0 = 0; \
+	OCR0 = RTOS_CORE_OCR; \
+	TIMSK |= _BV (OCIE0); \
+}
+#define RTOS_TIMER0_VECTOR TIMER0_COMP_vect
+
+#define RTOS_TIMER1_INIT() { \
+	TCCR1A = 0; \
+	TCCR1B = _BV (WGM13) | _BV (WGM12) | (RTOS_CORE_PRESCALER << CS10); \
+	TCNT1 = 0; \
+	ICR1 = RTOS_CORE_OCR; \
+	TIMSK |= _BV (TICIE1); \
+}
+#define RTOS_TIMER1_VECTOR TIMER1_CAPT_vect
+
+#define RTOS_TIMER2_INIT() { \
+	TCCR2 = _BV (WGM21) | (RTOS_CORE_PRESCALER << CS20); \
+	TCNT2 = 0; \
+	OCR2 = RTOS_CORE_OCR; \
+	TIMSK |= _BV (OCIE2); \
+}
+#define RTOS_TIMER2_VECTOR TIMER2_COMP_vect
+
+
+#endif /* RTOSP_ATMEGA16_H_ */
