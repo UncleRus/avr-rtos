@@ -20,7 +20,7 @@ volatile static uint32_t _dropped = 0;
 void task_t::run ()
 {
 	if (sleeping || (single && running) || (idle < interval)) return;
-	idle = idle - interval;
+	idle -= interval;
 	running = true;
 	if (callback) callback (this);
 	running = false;
