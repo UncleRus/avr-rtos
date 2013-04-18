@@ -57,7 +57,7 @@ void remove (task_t *task)
 	if (task->next) task->next->prev = task->prev;
 	if (task->prev) task->prev->next = task->next;
 	if (task == first) first = task->next;
-	else if (task == last) last = task->prev;
+	if (task == last) last = task->prev;
 	release_mutex ();
 
 	delete task;
