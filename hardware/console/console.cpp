@@ -32,7 +32,7 @@ DECLARE_PGM_STR (str_console_bs, "\x08 \x08");
 
 static uint8_t _command_len = 0;
 static callback_t _handler = NULL;
-static char _command [CONSOLE_MAX_CMD_LENGTH];
+static char _command [CONSOLE_MAX_CMD_LENGTH + 1];
 
 void endl ()
 {

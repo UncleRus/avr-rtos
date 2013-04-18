@@ -40,9 +40,9 @@ void _on_timeout (rtos::task_t *task)
 	timeout = true;
 }
 
-const char _rx_buffer [MTWI_RX_BUFFER_SIZE];
+char _rx_buffer [MTWI_RX_BUFFER_SIZE] = {};
 const char *_rx_end = _rx_buffer + MTWI_RX_BUFFER_SIZE - 1;
-const char *_rx_position = _rx_buffer;
+char *_rx_position = _rx_buffer;
 
 uint8_t utils::hex2nibble (char hex)
 {
@@ -141,7 +141,7 @@ uint8_t _exec (char cmd, char arg)
 	);
 	_wait ();
 	if (error) return 0;
-	if (!is_byte_acked ())
+	if (!is_byte_acked)
 	{
 		error = MTWI_ERR_NOT_ACKED;
 		return 0;

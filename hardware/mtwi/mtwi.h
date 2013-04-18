@@ -1,6 +1,8 @@
 #ifndef MTWI_H_
 #define MTWI_H_
 
+#include <stdint.h>
+
 #define MTWI_ERR_TIMEOUT 1
 #define MTWI_ERR_BUS_FAIL 2
 #define MTWI_ERR_BUSY 3
