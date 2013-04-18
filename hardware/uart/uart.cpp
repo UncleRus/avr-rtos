@@ -11,10 +11,10 @@ namespace uart0
 #define UART_TX_BUFFER_MASK (UART_TX_BUFFER_SIZE - 1)
 
 #if (UART_RX_BUFFER_SIZE & UART_RX_BUFFER_MASK)
-#error RX buffer size is not a power of 2
+#	error RX buffer size is not a power of 2
 #endif
 #if (UART_TX_BUFFER_SIZE & UART_TX_BUFFER_MASK)
-#error TX buffer size is not a power of 2
+#	error TX buffer size is not a power of 2
 #endif
 
 static volatile uint8_t _tx_buffer [UART_TX_BUFFER_SIZE];
