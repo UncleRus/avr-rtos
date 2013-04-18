@@ -24,7 +24,8 @@ void task_t::run ()
 	running = true;
 	if (callback) callback (this);
 	running = false;
-	if (++ runs >= max_runs && max_runs)
+	runs ++;
+	if (runs >= max_runs && max_runs)
 		remove (this);
 }
 
@@ -62,12 +63,12 @@ void remove (task_t *task)
 	delete task;
 }
 
-void tick ()
+inline void tick ()
 {
 	ticks ++;
 	skipped ++;
 
-	if (mutex) return;
+	if (!mutex) return;
 	mutex = true;
 
 	task_t *task = first;

@@ -61,12 +61,13 @@ class task_t: public _class
 {
 	public:
 		callback_t callback;
-		uint32_t interval, max_runs, idle, runs;
+		uint32_t interval, idle;
+		uint16_t max_runs, runs;
 		bool single, sleeping, running;
 		task_t *prev, *next;
 
-		task_t (callback_t _callback, uint32_t _interval, uint32_t _max_runs, bool _single, bool _sleeping, task_t *_prev, task_t *_next)
-			: callback (_callback), interval (_interval), max_runs (_max_runs), idle (0), runs (0),
+		task_t (callback_t _callback, uint32_t _interval, uint16_t _max_runs, bool _single, bool _sleeping, task_t *_prev, task_t *_next)
+			: callback (_callback), interval (_interval), idle (0), max_runs (_max_runs), runs (0),
 			  single (_single), sleeping (_sleeping), running (false),
 			  prev (_prev), next (_next)
 		{}
