@@ -68,7 +68,7 @@ inline void tick ()
 	ticks ++;
 	skipped ++;
 
-	if (!mutex) return;
+	if (mutex) return;
 	mutex = true;
 
 	task_t *task = first;
