@@ -23,7 +23,7 @@ void console_tick (rtos::task_t *task)
 
 void on_console (const char *command)
 {
-	uart::puts (command);
+	uart0::send_string (command);
 	console::endl ();
 }
 
@@ -31,7 +31,7 @@ int main ()
 {
 	//DDRB |= _BV (PB5);
 	DDRB = 0xff;
-	uart::init (UART_BAUD_SELECT (19200));
+	uart0::init (UART_BAUD_SELECT (19200));
 
 	console::set_callback (on_console);
 	rtos::add (console_tick, 50);

@@ -13,6 +13,16 @@
 #define DECLARE_PGM_STR(var, value) extern const char PROGMEM var []; const char var [] = value;
 #endif
 
+#include "setup.h"
+
+#ifndef CONSOLE_UART
+#	define CONSOLE_UART uart0
+#endif
+
+#ifndef CONSOLE_MAX_CMD_LENGTH
+#	define CONSOLE_MAX_CMD_LENGTH (UART_RX_BUFFER_SIZE - 1)
+#endif
+
 namespace console
 {
 
@@ -26,13 +36,13 @@ static char _command [CONSOLE_MAX_CMD_LENGTH];
 
 void endl ()
 {
-	uart::puts_p (str_console_endl);
+	CONSOLE_UART::send_string_p (str_console_endl);
 }
 
-void show_prompt ()
+inline void show_prompt ()
 {
 	endl ();
-	uart::puts_p (str_console_prompt);
+	CONSOLE_UART::send_string_p (str_console_prompt);
 	_command_len = 0;
 }
 
@@ -60,7 +70,7 @@ int32_t int_argument (uint8_t position)
 
 bool _process_byte ()
 {
-	uint16_t data = uart::getc ();
+	uint16_t data = CONSOLE_UART::receive ();
 	if (data & 0xff00) return false;
 	uint8_t byte = data & 0xff;
 	switch (byte)
@@ -78,16 +88,16 @@ bool _process_byte ()
 		case KEY_BS:
 			if (!_command_len) return true;
 			_command_len --;
-			uart::puts_p (str_console_bs);
+			CONSOLE_UART::send_string_p (str_console_bs);
 			return true;
 		default:
 			if (byte < 0x20 || _command_len == CONSOLE_MAX_CMD_LENGTH)
 			{
-				uart::putc (0x07);
+				CONSOLE_UART::send (0x07);
 				return true;
 			}
 			_command [_command_len ++] = byte;
-			uart::putc (byte);
+			CONSOLE_UART::send (byte);
 	}
 	return true;
 }
