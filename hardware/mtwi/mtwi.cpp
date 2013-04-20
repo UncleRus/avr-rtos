@@ -30,8 +30,8 @@ void _on_timeout (rtos::task_t *task)
 	timeout = true;
 }
 
-static const char *_rx_end = _rx_buffer + MTWI_RX_BUFFER_SIZE - 1;
-static char *_rx_position = _rx_buffer;
+static uint8_t _rx_position = 0;
+static uint8_t _rx_buffer [MTWI_RX_BUFFER_SIZE];
 
 uint8_t utils::hex2nibble (char hex)
 {
@@ -52,6 +52,22 @@ void _wait ()
 		;
 	if (timeout) error = MTWI_ERR_TIMEOUT;
 		else rtos::remove (timeout_task);
+}
+
+bool exists (uint8_t addr)
+{
+	error = 0;
+	send_start ();
+	_wait ();
+	if (!is_start_sent)
+		error = MTWI_ERR_BUS_FAIL;
+	if (error) return false;
+	send_byte (addr);
+	_wait ();
+	if (error) return false;
+	bool result = is_byte_acked;
+	send_stop ();
+	return result;
 }
 
 uint8_t _exec (char cmd, char arg)
@@ -105,7 +121,7 @@ uint8_t _exec (char cmd, char arg)
 			return 2;
 		case '?':
 			// ask byte
-			if (_rx_position == _rx_end)
+			if (_rx_position == MTWI_RX_BUFFER_SIZE)
 			{
 				error = MTWI_ERR_BUFFER_OVERFLOW;
 				return 0;
@@ -119,7 +135,7 @@ uint8_t _exec (char cmd, char arg)
 				error = MTWI_ERR_BUSY;
 				return 0;
 			}
-			*(++ _rx_position) = TWDR;
+			_rx_buffer [_rx_position ++] = TWDR;
 			return 1;
 	}
 	// send byte by default
@@ -139,11 +155,12 @@ uint8_t _exec (char cmd, char arg)
 	return 2;
 }
 
-const char *exec (const char *cmd)
+const uint8_t *exec (const char *cmd)
 {
 	acquire_mutex ();
 
 	error = 0;
+	_rx_position = 0;
 	while (*cmd && !error)
 		cmd += _exec (*cmd, *(cmd + 1));
 
@@ -151,11 +168,12 @@ const char *exec (const char *cmd)
 	return _rx_buffer;
 }
 
-const char *exec_p (const char *progmem_cmd)
+const uint8_t *exec_p (const char *progmem_cmd)
 {
 	acquire_mutex ();
 
 	error = 0;
+	_rx_position = 0;
 	char cmd;
 	while ( (cmd = pgm_read_byte (progmem_cmd)) && !error)
 		progmem_cmd += _exec (cmd, pgm_read_byte (progmem_cmd + 1));

@@ -29,11 +29,10 @@ namespace utils
 	uint8_t hex2nibble (char hex);
 }
 
-static char _rx_buffer [MTWI_RX_BUFFER_SIZE] = {};
-
 volatile static uint8_t error = 0;
-const char *exec (const char *cmd);
-const char *exec_p (const char *progmem_cmd);
+const uint8_t *exec (const char *cmd);
+const uint8_t *exec_p (const char *progmem_cmd);
+bool exists (uint8_t addr);
 
 }
 
