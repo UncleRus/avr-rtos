@@ -38,13 +38,13 @@ ISR (UART0_RECEIVE_INTERRUPT)
 
 	/* */
 #if defined(AT90_UART)
-	error = (usr & (_BV (FE)|_BV (DOR)));
+	error = (usr & (_BV (FE) | _BV (DOR)));
 #elif defined(ATMEGA_USART)
 	error = (usr & (_BV (FE) | _BV (DOR)));
 #elif defined(ATMEGA_USART0)
-	error = (usr & (_BV (FE0)|_BV (DOR0)));
+	error = (usr & (_BV (FE0) | _BV (DOR0)));
 #elif defined (ATMEGA_UART)
-	error = (usr & (_BV (FE)|_BV (DOR)));
+	error = (usr & (_BV (FE) | _BV (DOR)));
 #endif
 
 	/* calculate buffer index */
@@ -69,6 +69,7 @@ ISR (UART0_TRANSMIT_INTERRUPT)
 
 	if (_tx_head == _tx_tail)
 	{
+		//PORTB = 0xff;
 		/* tx buffer empty, disable UDRE interrupt */
 		UART0_CONTROL &= ~_BV (UART0_UDRIE);
 		return;
@@ -89,36 +90,36 @@ void init (uint16_t baud_rate)
 
 #if defined(AT90_UART)
 	/* set baud rate */
-	UBRR = (uint8_t)baud_rate;
+	UBRR = (uint8_t) baud_rate;
 
 	/* enable UART receiver and transmmitter and receive complete interrupt */
-	UART0_CONTROL = _BV (RXCIE)|_BV (RXEN)|_BV (TXEN);
+	UART0_CONTROL = _BV (RXCIE) | _BV (RXEN) | _BV (TXEN);
 
 #elif defined (ATMEGA_USART)
 	/* Set baud rate */
 	if (baud_rate & 0x8000)
 	{
-		UART0_STATUS = (1 << U2X);  //Enable 2x speed
+		UART0_STATUS = _BV (U2X);  //Enable 2x speed
 		baud_rate &= ~0x8000;
 	}
 	UBRRH = (uint8_t) (baud_rate >> 8);
 	UBRRL = (uint8_t) baud_rate;
 
 	/* Enable USART receiver and transmitter and receive complete interrupt */
-	UART0_CONTROL =	_BV (RXCIE) | (1 << RXEN) | (1 << TXEN);
+	UART0_CONTROL =	_BV (RXCIE) | _BV (RXEN) | _BV (TXEN);
 
 	/* Set frame format: asynchronous, 8data, no parity, 1stop bit */
 #ifdef URSEL
-	UCSRC = (1 << URSEL) | (3 << UCSZ0);
+	UCSRC = _BV (URSEL) | (3 << UCSZ0);
 #else
-	UCSRC = (3<<UCSZ0);
+	UCSRC = (3 << UCSZ0);
 #endif
 
 #elif defined (ATMEGA_USART0)
 	/* Set baud rate */
 	if (baud_rate & 0x8000)
 	{
-		UART0_STATUS = (1 << U2X0);  //Enable 2x speed
+		UART0_STATUS = _BV (U2X0);  //Enable 2x speed
 		baud_rate &= ~0x8000;
 	}
 	UBRR0H = (uint8_t) (baud_rate >> 8);
@@ -183,7 +184,6 @@ void send (uint8_t data)
 
 	/* enable UDRE interrupt */
 	UART0_CONTROL |= _BV (UART0_UDRIE);
-
 }
 
 void send_string (const char *s)
@@ -282,14 +282,14 @@ void init (uint16_t baud_rate)
 	/* Set baud rate */
 	if (baud_rate & 0x8000)
 	{
-		UART1_STATUS = (1 << U2X1);  //Enable 2x speed
+		UART1_STATUS = _BV (U2X1);  //Enable 2x speed
 		baud_rate &= ~0x8000;
 	}
 	UBRR1H = (uint8_t) (baud_rate >> 8);
 	UBRR1L = (uint8_t) baud_rate;
 
 	/* Enable USART receiver and transmitter and receive complete interrupt */
-	UART1_CONTROL = _BV (RXCIE1) | (1 << RXEN1) | (1 << TXEN1);
+	UART1_CONTROL = _BV (RXCIE1) | _BV (RXEN1) | _BV (TXEN1);
 
 	/* Set frame format: asynchronous, 8data, no parity, 1stop bit */
 #ifdef URSEL1

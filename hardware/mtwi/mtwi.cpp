@@ -4,16 +4,6 @@
 #include <util/delay.h>
 #include "rtos/core.h"
 
-#include "setup.h"
-
-#ifndef MTWI_TIMEOUT
-#	define MTWI_TIMEOUT 500
-#endif
-
-#ifndef MTWI_RX_BUFFER_SIZE
-#	define MTWI_RX_BUFFER_SIZE 16
-#endif
-
 namespace mtwi
 {
 
@@ -40,9 +30,8 @@ void _on_timeout (rtos::task_t *task)
 	timeout = true;
 }
 
-char _rx_buffer [MTWI_RX_BUFFER_SIZE] = {};
-const char *_rx_end = _rx_buffer + MTWI_RX_BUFFER_SIZE - 1;
-char *_rx_position = _rx_buffer;
+static const char *_rx_end = _rx_buffer + MTWI_RX_BUFFER_SIZE - 1;
+static char *_rx_position = _rx_buffer;
 
 uint8_t utils::hex2nibble (char hex)
 {
@@ -134,11 +123,12 @@ uint8_t _exec (char cmd, char arg)
 			return 1;
 	}
 	// send byte by default
-	send_byte (
-		arg
-			? (utils::hex2nibble (cmd) << 4) | utils::hex2nibble (arg)
-			: utils::hex2nibble (cmd)
-	);
+	if (!arg)
+	{
+		error = MTWI_ERR_INVALID_COMMAND;
+		return 0;
+	}
+	send_byte ((utils::hex2nibble (cmd) << 4) | utils::hex2nibble (arg));
 	_wait ();
 	if (error) return 0;
 	if (!is_byte_acked)
@@ -154,12 +144,8 @@ const char *exec (const char *cmd)
 	acquire_mutex ();
 
 	error = 0;
-	while (*cmd)
-	{
-		uint8_t offset = _exec (*cmd, *(cmd + 1));
-		if (!offset) break;
-		cmd += offset;
-	}
+	while (*cmd && !error)
+		cmd += _exec (*cmd, *(cmd + 1));
 
 	release_mutex ();
 	return _rx_buffer;
@@ -170,14 +156,9 @@ const char *exec_p (const char *progmem_cmd)
 	acquire_mutex ();
 
 	error = 0;
-	do
-	{
-		char cmd = pgm_read_byte (progmem_cmd);
-		if (!cmd) break;
-		uint8_t offset = _exec (cmd, pgm_read_byte (progmem_cmd + 1));
-		progmem_cmd += offset;
-	}
-	while (!error);
+	char cmd;
+	while ( (cmd = pgm_read_byte (progmem_cmd)) && !error)
+		progmem_cmd += _exec (cmd, pgm_read_byte (progmem_cmd + 1));
 
 	release_mutex ();
 	return _rx_buffer;

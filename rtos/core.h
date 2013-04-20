@@ -94,7 +94,7 @@ class task_t: public _class
 			sleeping = false;
 		}
 
-		void run ();
+		task_t *run ();
 };
 
 volatile static uint32_t ticks = 0;

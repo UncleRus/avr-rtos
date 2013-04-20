@@ -32,7 +32,7 @@ DECLARE_PGM_STR (str_console_bs, "\x08 \x08");
 
 static uint8_t _command_len = 0;
 static callback_t _handler = NULL;
-static char _command [CONSOLE_MAX_CMD_LENGTH + 1];
+static char _command [CONSOLE_MAX_CMD_LENGTH];
 
 void endl ()
 {
@@ -73,9 +73,11 @@ bool _process_byte ()
 	uint16_t data = CONSOLE_UART::receive ();
 	if (data & 0xff00) return false;
 	uint8_t byte = data & 0xff;
+	endl ();
 	switch (byte)
 	{
 		case KEY_ENTER:
+			PORTB = 0x00;
 			if (_command_len)
 			{
 				_command [_command_len] = 0;
@@ -91,7 +93,7 @@ bool _process_byte ()
 			CONSOLE_UART::send_string_p (str_console_bs);
 			return true;
 		default:
-			if (byte < 0x20 || _command_len == CONSOLE_MAX_CMD_LENGTH)
+			if (byte < 0x20 || _command_len == CONSOLE_MAX_CMD_LENGTH - 2)
 			{
 				CONSOLE_UART::send (0x07);
 				return true;

@@ -17,16 +17,21 @@ volatile static uint32_t skipped = 0;
 #define acquire_mutex() { while (mutex) {} mutex = true; }
 #define release_mutex() { mutex = false; }
 
-void task_t::run ()
+task_t *task_t::run ()
 {
-	if (sleeping || (single && running) || (idle < interval)) return;
+	if (sleeping || (single && running) || (idle < interval)) return next;
 	idle -= interval;
 	running = true;
 	if (callback) callback (this);
 	running = false;
 	runs ++;
 	if (runs >= max_runs && max_runs)
+	{
+		task_t *result = next;
 		remove (this);
+		return result;
+	}
+	return next;
 }
 
 void start ()
@@ -76,9 +81,8 @@ inline void tick ()
 	{
 		task->idle += skipped;
 		release_mutex ();
-		task->run ();
+		task = task->run ();
 		acquire_mutex ();
-		task = task->next;
 	}
 	skipped = 0;
 	release_mutex ();
