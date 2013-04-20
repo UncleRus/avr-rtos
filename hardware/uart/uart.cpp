@@ -155,6 +155,7 @@ uint16_t receive ()
 	uint8_t _tail;
 	uint8_t data;
 
+	sei ();
 	if (_rx_head == _rx_tail)
 		return UART_NO_DATA; /* no data available */
 
@@ -176,6 +177,7 @@ void send (uint8_t data)
 
 	_head = (_tx_head + 1) & UART_TX_BUFFER_MASK;
 
+	sei ();
 	while (_head == _tx_tail)
 		;/* wait for free space in buffer */
 

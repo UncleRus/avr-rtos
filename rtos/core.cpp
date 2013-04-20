@@ -25,7 +25,7 @@ task_t *task_t::run ()
 	if (callback) callback (this);
 	running = false;
 	runs ++;
-	if (runs >= max_runs && max_runs)
+	if (max_runs && runs >= max_runs)
 	{
 		task_t *result = next;
 		remove (this);
