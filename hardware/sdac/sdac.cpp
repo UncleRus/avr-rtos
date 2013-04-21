@@ -49,9 +49,7 @@ volatile static bool mutex = false;
 #define release_mutex() { mutex = false; }
 
 
-#define sync_low() { SDAC_SYNC_PORT &= ~_BV (SDAC_SYNC_BIT); }
-#define sync_high() { SDAC_SYNC_PORT |= _BV (SDAC_SYNC_BIT); }
-
+#define sync() { SDAC_SYNC_PORT |= _BV (SDAC_SYNC_BIT); _delay_us (SDAC_DELAY); SDAC_SYNC_PORT &= ~_BV (SDAC_SYNC_BIT); }
 #define send_bit(b) { \
 	SDAC_DATA_PORT &= ~_BV (SDAC_DATA_BIT); \
 	SDAC_DATA_PORT |= (b & 0xfffe) << SDAC_DATA_BIT; \
@@ -76,11 +74,11 @@ void set (uint16_t value)
 {
 	acquire_mutex ();
 
-	SDAC_SYNC_PORT |= _BV (SDAC_SYNC_BIT);
-	_delay_us (SDAC_DELAY);
 
+	sync ();
 	for (uint8_t i = 0; i < 16; i ++)
 		send_bit (value >> i);
+	_delay_us (SDAC_DELAY);
 
 	release_mutex ();
 }
