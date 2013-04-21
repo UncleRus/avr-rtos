@@ -1,0 +1,18 @@
+#ifndef SDAC_SETUP_H_
+#define SDAC_SETUP_H_
+
+#define SDAC_SCLK_DDR DDRD
+#define SDAC_SCLK_PORT PORTD
+#define SDAC_SCLK_BIT PD5
+
+#define SDAC_SYNC_DDR DDRD
+#define SDAC_SYNC_PORT PORTD
+#define SDAC_SYNC_BIT PD6
+
+#define SDAC_DATA_DDR DDRD
+#define SDAC_DATA_PORT PORTD
+#define SDAC_DATA_BIT PD7
+
+#define SDAC_DELAY 10
+
+#endif /* SDAC_SETUP_H_ */

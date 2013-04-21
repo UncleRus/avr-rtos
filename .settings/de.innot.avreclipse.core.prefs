@@ -1,7 +1,7 @@
 avrtarget/ClockFrequency=8000000
 avrtarget/ExtRAMSize=0
 avrtarget/ExtendedRAM=false
-avrtarget/MCUType=atmega16
+avrtarget/MCUType=atmega8
 avrtarget/UseEEPROM=false
 avrtarget/UseExtendedRAMforHeap=true
 avrtarget/perConfig=false
