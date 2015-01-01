@@ -38,7 +38,7 @@
 #endif
 
 
-#include "rtos/core.h"
+#include "hardware/uart/uart.h"
 
 namespace sdac
 {
@@ -74,11 +74,23 @@ void set (uint16_t value)
 {
 	acquire_mutex ();
 
-
+	//uart0::send_int (value);
+	//uart0::send_string ("\r\n");
+	SDAC_SCLK_PORT |= _BV (SDAC_SCLK_BIT);
 	sync ();
+	SDAC_SCLK_PORT &= ~_BV (SDAC_SCLK_BIT);
 	for (uint8_t i = 0; i < 16; i ++)
-		send_bit (value >> i);
-	_delay_us (SDAC_DELAY);
+	{
+		SDAC_DATA_PORT &= ~_BV (SDAC_DATA_BIT);
+		SDAC_DATA_PORT |= ((value >> i) & 1) << SDAC_DATA_BIT;
+		SDAC_SCLK_PORT |= _BV (SDAC_SCLK_BIT);
+		_delay_us (SDAC_DELAY);
+		SDAC_SCLK_PORT &= ~_BV (SDAC_SCLK_BIT);
+		_delay_us (SDAC_DELAY);
+	}
+	SDAC_DATA_PORT &= ~_BV (SDAC_DATA_BIT);
+	sync ();
+	//_delay_us (SDAC_DELAY);
 
 	release_mutex ();
 }
